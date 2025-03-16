@@ -54,4 +54,35 @@ public class Transportation extends BaseEntity {
         return this.origin.getLocationCode().equals(location.getLocationCode());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        Transportation that = (Transportation) o;
+        
+        if (origin == null || that.origin == null || 
+            destination == null || that.destination == null) {
+            return false;
+        }
+        
+        if (!origin.getLocationCode().equals(that.origin.getLocationCode())) return false;
+        if (!destination.getLocationCode().equals(that.destination.getLocationCode())) return false;
+        if (transportationType != that.transportationType) return false;
+        
+        // Compare operatingDays list
+        return operatingDays == null ? that.operatingDays == null : 
+               operatingDays.size() == that.operatingDays.size() && 
+               operatingDays.containsAll(that.operatingDays);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + (origin != null ? origin.getLocationCode().hashCode() : 0);
+        result = 31 * result + (destination != null ? destination.getLocationCode().hashCode() : 0);
+        result = 31 * result + (transportationType != null ? transportationType.hashCode() : 0);
+        result = 31 * result + (operatingDays != null ? operatingDays.hashCode() : 0);
+        return result;
+    }
 }
