@@ -1,6 +1,7 @@
 package com.example.aviation.modules.transportations.entity;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.example.aviation.common.entity.BaseEntity;
 import com.example.aviation.modules.locations.entity.Location;
@@ -56,16 +57,26 @@ public class Transportation extends BaseEntity {
 
     @Override
     public boolean equals(Object o) {
+        // First check if it's the same instance
         if (this == o) return true;
+        
+        // Check if object is comparable
         if (o == null || getClass() != o.getClass()) return false;
+        
+        // Use ID-based equality if this entity has an ID (is persisted)
+        if (getId() != null) {
+            return super.equals(o);
+        }
         
         Transportation that = (Transportation) o;
         
+        // Check business key equality for non-persisted entities
         if (origin == null || that.origin == null || 
             destination == null || that.destination == null) {
             return false;
         }
         
+        // Check each business key component
         if (!origin.getLocationCode().equals(that.origin.getLocationCode())) return false;
         if (!destination.getLocationCode().equals(that.destination.getLocationCode())) return false;
         if (transportationType != that.transportationType) return false;
@@ -78,6 +89,13 @@ public class Transportation extends BaseEntity {
 
     @Override
     public int hashCode() {
+        
+        // Use ID-based hashCode if this entity has an ID (is persisted)
+        if (getId() != null) {
+            return super.hashCode();
+        }
+        
+        // Generate hashCode based on business key for non-persisted entities
         int result = 17;
         result = 31 * result + (origin != null ? origin.getLocationCode().hashCode() : 0);
         result = 31 * result + (destination != null ? destination.getLocationCode().hashCode() : 0);
