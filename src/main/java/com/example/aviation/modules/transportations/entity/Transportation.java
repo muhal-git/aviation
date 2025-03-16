@@ -1,7 +1,6 @@
 package com.example.aviation.modules.transportations.entity;
 
 import java.util.List;
-import java.util.Objects;
 
 import com.example.aviation.common.entity.BaseEntity;
 import com.example.aviation.modules.locations.entity.Location;
@@ -89,7 +88,7 @@ public class Transportation extends BaseEntity {
 
     @Override
     public int hashCode() {
-        
+
         // Use ID-based hashCode if this entity has an ID (is persisted)
         if (getId() != null) {
             return super.hashCode();

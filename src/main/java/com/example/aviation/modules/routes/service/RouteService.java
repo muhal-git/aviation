@@ -47,33 +47,51 @@ public class RouteService {
                 .orElseThrow(() -> new LocationNotFoundExeption("Destination location not found"));
 
         // 1. Direct flight (only one segment)
-        addDirectFlight(routes, origin, destination, date);
+        addDirectFlightOption(routes, origin, destination, date);
 
         // 2. Two-segment routes
         // Option A: Before flight transfer + flight
-        transferThenFlight(routes, origin, destination, date);
+        addTransferThenFlightOptions(routes, origin, destination, date);
 
         // Option B: Flight + after flight transfer
-        flightThenTransfer(routes, origin, destination, date);
+        addFlightThenTransferOptions(routes, origin, destination, date);
 
         // 3. Three-segment routes: before transfer + flight + after transfer
-        transferThenFlightThenTransfer(routes, origin, destination, date);
+        addTransferThenFlightThenTransferOptions(routes, origin, destination, date);
 
         return routes;
     }
 
-    private void transferThenFlightThenTransfer(List<RouteResponse> routes, Location origin, Location destination,
+    private void addTransferThenFlightThenTransferOptions(List<RouteResponse> routes, Location origin, Location destination,
             LocalDate date) {
 
         List<Transportation> possibleFlightTransfers = transportationRepository
                 .findByTransportationTypeNotAndOrigin(TransportationType.FLIGHT, origin);
         List<Transportation> possibleTransfersAfterFlight = transportationRepository
                 .findByTransportationTypeNotAndDestination(TransportationType.FLIGHT, destination);
-        
-        
+
+        for (Transportation possibleFlightTransfer : possibleFlightTransfers) {
+            for (Transportation possibleTransferAfterFlight : possibleTransfersAfterFlight) {
+                Location posibleFlightOrigin = possibleFlightTransfer.getDestination();
+                Location possibleFlightDestination = possibleTransferAfterFlight.getOrigin();
+                Optional<Transportation> possibleFlight = transportationRepository
+                        .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, posibleFlightOrigin,
+                                possibleFlightDestination);
+                if (possibleFlight.isPresent() && isOperatingOn(possibleFlight.get(), date)
+                        && isOperatingOn(possibleFlightTransfer, date)
+                        && isOperatingOn(possibleTransferAfterFlight, date)) {
+                    TransportationDto transferBeforeFlightDto = mapToDto(possibleFlightTransfer);
+                    TransportationDto flightDto = mapToDto(possibleFlight.get());
+                    TransportationDto transferAfterFlightDto = mapToDto(possibleTransferAfterFlight);
+                    routes.add(new RouteResponse("via " + possibleFlightTransfer.getDestination().getName(),
+                            transferBeforeFlightDto, flightDto, transferAfterFlightDto));
+                }
+            }
+        }
+
     }
 
-    private void flightThenTransfer(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
+    private void addFlightThenTransferOptions(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
 
         List<Transportation> flights = transportationRepository.findByTransportationTypeAndOrigin(
                 TransportationType.FLIGHT,
@@ -96,7 +114,7 @@ public class RouteService {
 
     }
 
-    private void transferThenFlight(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
+    private void addTransferThenFlightOptions(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
 
         List<Transportation> flightTransfers = transportationRepository
                 .findByTransportationTypeNotAndOrigin(TransportationType.FLIGHT, origin);
@@ -117,7 +135,7 @@ public class RouteService {
         }
     }
 
-    private void addDirectFlight(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
+    private void addDirectFlightOption(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
 
         Optional<Transportation> directFlight = transportationRepository
                 .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, origin, destination);
