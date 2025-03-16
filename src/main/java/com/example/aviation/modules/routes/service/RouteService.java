@@ -2,6 +2,7 @@ package com.example.aviation.modules.routes.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.aviation.common.exception.custom.LocationNotFoundExeption;
 import com.example.aviation.modules.locations.entity.Location;
 import com.example.aviation.modules.locations.repository.LocationRepository;
 import com.example.aviation.modules.transportations.dto.RouteResponse;
@@ -12,6 +13,7 @@ import com.example.aviation.modules.transportations.repository.TransportationRep
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,111 +37,53 @@ public class RouteService {
      * or three segments (before flight transfer, flight, after flight transfer).
      */
     public List<RouteResponse> getValidRoutes(String originCode, String destinationCode, LocalDate date) {
-        List<RouteResponse> routes = new ArrayList<>();
+
+        List<RouteResponse> routes = new LinkedList<>();
 
         Optional<Location> originOpt = locationRepository.findByLocationCode(originCode);
         Optional<Location> destinationOpt = locationRepository.findByLocationCode(destinationCode);
 
-        if (!originOpt.isPresent() || !destinationOpt.isPresent()) {
-            return routes; // or throw exception if locations not found
-        }
-
-        Location origin = originOpt.get();
-        Location destination = destinationOpt.get();
+        Location origin = originOpt.orElseThrow(() -> new LocationNotFoundExeption("Origin location not found"));
+        Location destination = destinationOpt
+                .orElseThrow(() -> new LocationNotFoundExeption("Destination location not found"));
 
         // 1. Direct flight (only one segment)
-        List<Transportation> directFlights = transportationRepository
-                .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, origin, destination);
-        for (Transportation flight : directFlights) {
-            if (!isOperatingOn(flight, date))
-                continue;
-            TransportationDto flightDto = mapToDto(flight);
-            routes.add(new RouteResponse("Direct flight", null, flightDto, null));
-        }
+        addDirectFlight(routes, origin, destination, date);
 
         // 2. Two-segment routes
         // Option A: Before flight transfer + flight
-        List<Transportation> beforeTransfers = transportationRepository.findByTransportationTypeNotAndOrigin(
-                TransportationType.FLIGHT, origin);
-        for (Transportation before : beforeTransfers) {
-            if (!isOperatingOn(before, date))
+        List<Transportation> flightTransfers = transportationRepository
+                .findByTransportationTypeNotAndOrigin(TransportationType.FLIGHT, origin);
+        for (Transportation transportation : flightTransfers) {
+            if (!isOperatingOn(transportation, date))
                 continue;
-            // The destination of before transfer is intermediate
-            Location intermediate = before.getDestination();
-            List<Transportation> flights = transportationRepository.findByTransportationTypeAndOriginAndDestination(
-                    TransportationType.FLIGHT, intermediate, destination);
-            for (Transportation flight : flights) {
-                if (!isOperatingOn(flight, date))
-                    continue;
-                TransportationDto beforeDto = mapToDto(before);
-                TransportationDto flightDto = mapToDto(flight);
-                routes.add(new RouteResponse("via " + intermediate.getName(), beforeDto, flightDto, null));
+            Optional<Transportation> flightToDestination = transportationRepository
+                    .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT,
+                            transportation.getDestination(), destination);
+            if (flightToDestination.isPresent() && isOperatingOn(flightToDestination.get(), date)) {
+                TransportationDto transferDto = mapToDto(transportation);
+                TransportationDto flightDto = mapToDto(flightToDestination.get());
+                routes.add(new RouteResponse("via " + flightToDestination.get().getOrigin().getName(), transferDto, flightDto, null));
             }
+
         }
 
         // Option B: Flight + after flight transfer
-        List<Transportation> flightsFromOrigin = transportationRepository
-                .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, origin, null);
-        // Alternatively, fetch all flights originating from origin and then filter by
-        // destination match.
-        List<Transportation> allFlightsFromOrigin = transportationRepository.findByOrigin(origin);
-        for (Transportation flight : allFlightsFromOrigin) {
-            if (flight.getTransportationType() != TransportationType.FLIGHT)
-                continue;
-            if (!isOperatingOn(flight, date))
-                continue;
-            Location intermediate = flight.getDestination();
-            // Find non-flight transportation from intermediate to destination
-            List<Transportation> afterTransfers = transportationRepository
-                    .findByTransportationTypeNotAndDestination(TransportationType.FLIGHT, destination);
-            for (Transportation after : afterTransfers) {
-                if (!after.isOriginMatch(intermediate)) {
-                    // custom check: ensure that the origin of the afterTransfer equals the
-                    // intermediate from flight
-                    continue;
-                }
-                if (!isOperatingOn(after, date))
-                    continue;
-                TransportationDto flightDto = mapToDto(flight);
-                TransportationDto afterDto = mapToDto(after);
-                routes.add(new RouteResponse("via " + intermediate.getName(), null, flightDto, afterDto));
-            }
-        }
 
         // 3. Three-segment routes: before transfer + flight + after transfer
-        for (Transportation before : beforeTransfers) {
-            if (!isOperatingOn(before, date))
-                continue;
-            Location intermediate1 = before.getDestination();
-            // Find flights from intermediate1 (mandatory flight)
-            List<Transportation> flights = transportationRepository
-                    .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, intermediate1, null);
-            for (Transportation flight : flights) {
-                if (!isOperatingOn(flight, date))
-                    continue;
-                Location intermediate2 = flight.getDestination();
-                // Find after transfer from intermediate2 to destination
-                List<Transportation> afterTransfers = transportationRepository
-                        .findByTransportationTypeNotAndDestination(TransportationType.FLIGHT, destination);
-                for (Transportation after : afterTransfers) {
-                    if (!after.isOriginMatch(intermediate2))
-                        continue;
-                    if (!isOperatingOn(after, date))
-                        continue;
-                    TransportationDto beforeDto = mapToDto(before);
-                    TransportationDto flightDto = mapToDto(flight);
-                    TransportationDto afterDto = mapToDto(after);
-                    routes.add(new RouteResponse("via " + intermediate1.getName() + " and " + intermediate2.getName(),
-                            beforeDto, flightDto, afterDto));
-                }
-            }
-        }
-
-        // Additional filtering: ensure each route has exactly one flight,
-        // not more than one before or after transfers. The above loops already keep
-        // segments limited.
 
         return routes;
+    }
+
+    private void addDirectFlight(List<RouteResponse> routes, Location origin, Location destination, LocalDate date) {
+
+        Optional<Transportation> directFlight = transportationRepository
+                .findByTransportationTypeAndOriginAndDestination(TransportationType.FLIGHT, origin, destination);
+
+        if (directFlight.isPresent() && isOperatingOn(directFlight.get(), date)) {
+            TransportationDto flightDto = mapToDto(directFlight.get());
+            routes.add(new RouteResponse("Direct flight", null, flightDto, null));
+        }
     }
 
     private boolean isOperatingOn(Transportation t, LocalDate date) {

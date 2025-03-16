@@ -2,6 +2,7 @@ package com.example.aviation.modules.transportations.repository;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,7 +12,7 @@ import com.example.aviation.modules.transportations.enums.TransportationType;
 
 public interface TransportationRepository extends JpaRepository<Transportation, Long> {
 
-    List<Transportation> findByTransportationTypeAndOriginAndDestination(TransportationType type, Location origin, Location destination);
+    Optional<Transportation> findByTransportationTypeAndOriginAndDestination(TransportationType type, Location origin, Location destination);
    
     // For non-flight transportation
     List<Transportation> findByTransportationTypeNotAndOrigin(TransportationType type, Location origin);
