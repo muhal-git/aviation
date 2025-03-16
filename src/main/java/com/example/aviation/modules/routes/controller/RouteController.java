@@ -37,7 +37,7 @@ public class RouteController {
         summary = "Get possible routes.", 
         parameters = {
             @Parameter(name = "origin", description = "The origin location code", required = true, example = "SAW"),
-            @Parameter(name = "destination", description = "The destination location code", required = true, example = "IST"),
+            @Parameter(name = "destination", description = "The destination location code", required = true, example = "DLM"),
             @Parameter(name = "date", description = "The date of travel in ISO format", required = true, example = "2025-03-17")
         },
         description = "Returns possible routes between origin and destination on the given date.")
