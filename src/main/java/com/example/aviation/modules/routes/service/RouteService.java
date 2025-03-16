@@ -12,7 +12,6 @@ import com.example.aviation.modules.transportations.enums.TransportationType;
 import com.example.aviation.modules.transportations.repository.TransportationRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
