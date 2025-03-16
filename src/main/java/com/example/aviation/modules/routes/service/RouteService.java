@@ -59,8 +59,8 @@ public class RouteService {
 
         // 2. Two-segment routes
         // Option A: Before flight transfer + flight
-        List<Transportation> beforeTransfers = transportationRepository.findByTransportationTypeNotAndOrigin(origin,
-                TransportationType.FLIGHT);
+        List<Transportation> beforeTransfers = transportationRepository.findByTransportationTypeNotAndOrigin(
+                TransportationType.FLIGHT, origin);
         for (Transportation before : beforeTransfers) {
             if (!isOperatingOn(before, date))
                 continue;
@@ -91,7 +91,7 @@ public class RouteService {
             Location intermediate = flight.getDestination();
             // Find non-flight transportation from intermediate to destination
             List<Transportation> afterTransfers = transportationRepository
-                    .findByTransportationTypeNotAndDestination(destination, TransportationType.FLIGHT);
+                    .findByTransportationTypeNotAndDestination(TransportationType.FLIGHT, destination);
             for (Transportation after : afterTransfers) {
                 if (!after.isOriginMatch(intermediate)) {
                     // custom check: ensure that the origin of the afterTransfer equals the
@@ -120,7 +120,7 @@ public class RouteService {
                 Location intermediate2 = flight.getDestination();
                 // Find after transfer from intermediate2 to destination
                 List<Transportation> afterTransfers = transportationRepository
-                        .findByTransportationTypeNotAndDestination(destination, TransportationType.FLIGHT);
+                        .findByTransportationTypeNotAndDestination(TransportationType.FLIGHT, destination);
                 for (Transportation after : afterTransfers) {
                     if (!after.isOriginMatch(intermediate2))
                         continue;

@@ -2,9 +2,9 @@ spring:
   application:
     name: aviation-routes-service
   datasource:
-    url: jdbc:postgresql://db-ip:5432/AVIATIONDB
-    username: db-user  # TODO: Store in a secure place as encrypted
-    password: db-pass # TODO: Store in a secure place as encrypted
+    url: jdbc:postgresql://193.35.154.97:5432/AVIATIONDB
+    username: postgres  # TODO: Store in a secure place as encrypted
+    password: Huk-app.41@ # TODO: Store in a secure place as encrypted
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

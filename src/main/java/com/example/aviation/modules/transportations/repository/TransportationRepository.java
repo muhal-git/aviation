@@ -14,9 +14,14 @@ public interface TransportationRepository extends JpaRepository<Transportation, 
     List<Transportation> findByTransportationTypeAndOriginAndDestination(TransportationType type, Location origin, Location destination);
    
     // For non-flight transportation
-    List<Transportation> findByTransportationTypeNotAndOrigin(Location origin, TransportationType type);
-   
-    List<Transportation> findByTransportationTypeNotAndDestination(Location destination, TransportationType type);
+    List<Transportation> findByTransportationTypeNotAndOrigin(TransportationType type, Location origin);
+    List<Transportation> findByTransportationTypeNotAndDestination(TransportationType type, Location destination);
+
+    // For flight transportation from origin
+    List<Transportation> findByTransportationTypeAndOrigin(TransportationType type, Location origin);
+
+    // For non-flight transportation from origin to destination
+    List<Transportation> findByTransportationTypeNotAndOriginAndDestination(TransportationType type, Location origin, Location destination);
    
     // Generic search by origin and/or destination can be added as needed
     List<Transportation> findByOrigin(Location origin);
