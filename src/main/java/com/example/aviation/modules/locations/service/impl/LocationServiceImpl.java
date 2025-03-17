@@ -33,8 +33,8 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public LocationCreateOrUpdateResponse updateLocation(String locationCode, LocationCreateOrUpdateRequest updated) {
-        return locationRepository.findByLocationCode(locationCode)
+    public LocationCreateOrUpdateResponse updateLocation(Long id, LocationCreateOrUpdateRequest updated) {
+        return locationRepository.findById(id)
                 .map(location -> {
                     location.setName(updated.getName());
                     location.setCountry(updated.getCountry());
@@ -42,7 +42,7 @@ public class LocationServiceImpl implements LocationService {
                     location.setLocationCode(updated.getLocationCode());
                     Location updatedLocation = locationRepository.save(location);
                     return LocationMapper.mapToLocationResponse(updatedLocation);
-                }).orElseThrow(() -> new LocationNotFoundExeption("Location not found: " + locationCode));
+                }).orElseThrow(() -> new LocationNotFoundExeption("Location not found: " + id));
     }
 
     @Override

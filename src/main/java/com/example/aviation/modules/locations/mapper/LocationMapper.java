@@ -9,7 +9,7 @@ public class LocationMapper {
     private LocationMapper() {
         // private constructor
     }
-    
+
     public static Location mapToLocation(LocationCreateOrUpdateRequest request) {
         Location location = new Location();
         location.setName(request.getName());
@@ -21,13 +21,14 @@ public class LocationMapper {
 
     public static LocationCreateOrUpdateResponse mapToLocationResponse(Location location) {
         return LocationCreateOrUpdateResponse.builder()
-            .name(location.getName())
-            .country(location.getCountry())
-            .city(location.getCity())
-            .locationCode(location.getLocationCode())
-            .createdAt(location.getCreatedAt())
-            .updatedAt(location.getUpdatedAt())
-            .build();
+                .id(location.getId())
+                .name(location.getName())
+                .country(location.getCountry())
+                .city(location.getCity())
+                .locationCode(location.getLocationCode())
+                .createdAt(location.getCreatedAt())
+                .updatedAt(location.getUpdatedAt())
+                .build();
     }
-    
+
 }

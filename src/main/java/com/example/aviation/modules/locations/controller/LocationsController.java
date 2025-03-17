@@ -37,10 +37,10 @@ public class LocationsController {
         return ResponseEntity.ok(locationService.createLocation(request));
     }
 
-    @PutMapping("/{locationCode}")
-    public ResponseEntity<LocationCreateOrUpdateResponse> updateLocation(@PathVariable String locationCode,
+    @PutMapping("/{id}")
+    public ResponseEntity<LocationCreateOrUpdateResponse> updateLocation(@PathVariable Long id,
             @RequestBody LocationCreateOrUpdateRequest updated) {
-        return ResponseEntity.ok(locationService.updateLocation(locationCode, updated));
+        return ResponseEntity.ok(locationService.updateLocation(id, updated));
     }
 
     @DeleteMapping("/{locationCode}")

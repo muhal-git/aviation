@@ -16,7 +16,7 @@ public interface LocationService {
 
     LocationCreateOrUpdateResponse createLocation(LocationCreateOrUpdateRequest request);
 
-    LocationCreateOrUpdateResponse updateLocation(String locationCode, LocationCreateOrUpdateRequest updated);
+    LocationCreateOrUpdateResponse updateLocation(Long id, LocationCreateOrUpdateRequest updated);
 
     void deleteLocation(String locationCode);
 

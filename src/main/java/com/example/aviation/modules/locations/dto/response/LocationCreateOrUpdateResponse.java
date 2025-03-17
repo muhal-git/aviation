@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @Schema(description = "Location Create Or Update Response")
 public class LocationCreateOrUpdateResponse {
 
+    private Long id;
     private String name;
     private String country;
     private String city;
