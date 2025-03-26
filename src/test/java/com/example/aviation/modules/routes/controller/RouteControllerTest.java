@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class RouteControllerTest {
+class RouteControllerTest {
 
     @Mock
     private RouteService routeService;
@@ -31,13 +31,13 @@ public class RouteControllerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(routeController).build();
     }
 
     @Test
-    public void testGetRoutes() throws Exception {
+    void testGetRoutes() throws Exception {
         String origin = "SAW";
         String destination = "DLA";
         LocalDate date = LocalDate.of(2025, 3, 12);
@@ -57,7 +57,7 @@ public class RouteControllerTest {
     }
 
     @Test
-    public void testGetRoutesWithNullOrigin() throws Exception {
+    void testGetRoutesWithNullOrigin() throws Exception {
         String origin = null; // Invalid origin
         String destination = "DLA";
         LocalDate date = LocalDate.of(2025, 3, 12);
@@ -70,7 +70,7 @@ public class RouteControllerTest {
     }
 
     @Test
-    public void testGetRoutesWithNullDestination() throws Exception {
+    void testGetRoutesWithNullDestination() throws Exception {
         String origin = "SAW";
         String destination = null; // Invalid destination
         LocalDate date = LocalDate.of(2025, 3, 12);
@@ -83,7 +83,7 @@ public class RouteControllerTest {
     }
 
     @Test
-    public void testGetRoutesBadRequestInvalidDate() throws Exception {
+    void testGetRoutesBadRequestInvalidDate() throws Exception {
         String origin = "SAW";
         String destination = "DLA";
         String date = "invalid-date"; // Invalid date
