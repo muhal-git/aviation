@@ -39,7 +39,7 @@ public class LocationsController {
 
     @PutMapping("/{id}")
     public ResponseEntity<LocationCreateOrUpdateResponse> updateLocation(@PathVariable Long id,
-            @RequestBody LocationCreateOrUpdateRequest updated) {
+            @RequestBody @Valid LocationCreateOrUpdateRequest updated) {
         return ResponseEntity.ok(locationService.updateLocation(id, updated));
     }
 

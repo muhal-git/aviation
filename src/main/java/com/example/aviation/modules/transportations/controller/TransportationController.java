@@ -16,6 +16,7 @@ import com.example.aviation.modules.transportations.dto.request.TransportationCr
 import com.example.aviation.modules.transportations.dto.response.TransportationCreateOrUpdateResponse;
 import com.example.aviation.modules.transportations.service.TransportationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,13 +33,13 @@ public class TransportationController {
 
     @PostMapping
     public ResponseEntity<TransportationCreateOrUpdateResponse> createTransportation(
-            @RequestBody TransportationCreateOrUpdateRequest transportation) {
+            @RequestBody @Valid TransportationCreateOrUpdateRequest transportation) {
         return ResponseEntity.ok(transportationService.createTransportation(transportation));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TransportationCreateOrUpdateResponse> updateTransportation(@PathVariable Long id,
-            @RequestBody TransportationCreateOrUpdateRequest updated) {
+            @RequestBody @Valid TransportationCreateOrUpdateRequest updated) {
         return ResponseEntity.ok(transportationService.updateTransportation(id, updated));
     }
 
